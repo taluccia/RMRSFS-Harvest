@@ -1,0 +1,390 @@
+---
+title: "NBR values Combine csv"
+output: html_document
+---
+
+
+# Overview
+
+
+# Packages
+
+```{r}
+library(tidyverse)
+```
+
+
+
+# Data
+```{r}
+df1984 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1984.csv')
+df1985 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1985.csv')
+df1986 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1986.csv')
+df1987 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1987.csv')
+df1988 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1988.csv')
+df1989 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1989.csv')
+df1990 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1990.csv')
+```
+
+```{r}
+df1991 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1991.csv')
+df1992 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1992.csv')
+df1993 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1993.csv')
+df1994 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1994.csv')
+df1995 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1995.csv')
+df1996 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1996.csv')
+df1997 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1997.csv')
+df1998 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1998.csv')
+df1999 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues1999.csv')
+```
+
+```{r}
+df2000 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2000.csv')
+df2001 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2001.csv')
+df2002 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2002.csv')
+df2003 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2003.csv')
+df2004 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2004.csv')
+df2005 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2005.csv')
+df2006 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2006.csv')
+df2007 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2007.csv')
+df2008 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2008.csv')
+df2009 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2009.csv')
+
+```
+
+```{r}
+df2010 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2010.csv')
+df2011 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2011.csv')
+df2012 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2012.csv')
+df2013 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2013.csv')
+df2014 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2014.csv')
+df2015 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2015.csv')
+df2016 = read.csv('../data/NBR/2022-01-31_HarvestNBRValues2016.csv')
+```
+```{r}
+df1984
+```
+
+```{r}
+data84 = df1984 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1984)
+data85 = df1985 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1985)
+data86 = df1986 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1986)
+data87 = df1987 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1987)
+data88 = df1988 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1988)
+data89 = df1989 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1989)
+```
+
+```{r}
+data90 = df1990 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1990)
+data91 = df1991 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1991)
+data92 = df1992 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1992)
+data93 = df1993 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1993)
+data94 = df1994 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1994)
+data95 = df1995 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1995)
+data96 = df1996 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1996)
+data97 = df1997 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1997)
+data98 = df1998 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1998)
+data99 = df1999 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr1999)
+```
+
+```{r}
+data00 = df2000 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2000)
+data01 = df2001 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2001)
+data02 = df2002 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2002)
+data03 = df2003 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2003)
+data04 = df2004 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2004)
+data05 = df2005 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2005)
+data06 = df2006 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2006)
+data07 = df2007 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2007)
+data08 = df2008 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2008)
+data09 = df2009 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2009)
+
+```
+
+```{r}
+data10 = df2010 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2010)
+data11 = df2011 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2011)
+data12 = df2012 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2012)
+data13 = df2013 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2013)
+data14 = df2014 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2014)
+data15 = df2015 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2015)
+data16 = df2016 %>% select( plotid, NAME:changeNote, startYear, endYear, nbr2016)
+```
+
+```{r}
+head(data84)
+head(data85)
+head(data86)
+```
+
+```{r}
+df_list <- list(data84, data85, data86, data87, data88, data89, data90, data91, data92, data93, data94, data95, data96, data97, data98, data99, data00, data01, data02, data03, data04, data05, data06, data07, data08, data09, data10, data11, data12, data13, data14, data15, data16)
+```
+
+```{r}
+#merge all data frames in list
+all_df = df_list %>% reduce(full_join, by=c("plotid", "NAME", "STATE", "change", "changeNote", "startYear", "endYear"))
+```
+
+
+```{r}
+all_df
+```
+
+```{r}
+unique(all_df$plotid)
+```
+
+```{r}
+
+df2 = all_df %>%  rename("1984" = "nbr1984", 
+                   "1985" = "nbr1985", 
+                   "1986" = "nbr1986", 
+                   "1987" = "nbr1987", 
+                   "1988" = "nbr1988", 
+                   "1989" = "nbr1989", 
+                   "1990" = "nbr1990", 
+                   "1991" = "nbr1991", 
+                   "1992" = "nbr1992", 
+                   "1993" = "nbr1993", 
+                   "1994" = "nbr1994", 
+                   "1995" = "nbr1995", 
+                   "1996" = "nbr1996", 
+                   "1997" = "nbr1997", 
+                   "1998" = "nbr1998", 
+                   "1999" = "nbr1999",
+                   "2000" = "nbr2000",
+                   "2001" = "nbr2001",
+                   "2002" = "nbr2002",
+                   "2003" = "nbr2003",
+                   "2004" = "nbr2004",
+                   "2005" = "nbr2005",
+                   "2006" = "nbr2006",
+                   "2007" = "nbr2007",
+                   "2008" = "nbr2008",
+                   "2009" = "nbr2009",
+                   "2010" = "nbr2010",
+                   "2011" = "nbr2011",
+                   "2012" = "nbr2012",
+                   "2013" = "nbr2013",
+                   "2014" = "nbr2014",
+                   "2015" = "nbr2015",
+                   "2016" = "nbr2016")  %>%
+  pivot_longer(!c("plotid", "NAME", "STATE", "change", "changeNote", "startYear", "endYear"), names_to = "nbrYr", values_to = "nbr") %>%
+  pivot_longer(!c("plotid", "NAME", "STATE", "change", "changeNote", "nbrYr", "nbr"), names_to = "startEnd", values_to = "year") %>%
+  mutate(prePost = ifelse(startEnd == "startYear", "preNbr", "postNbr")) 
+
+
+df2
+```
+```{r}
+df2eq <- df2[df2$nbrYr==df2$year, ]
+
+df2eq
+```
+
+```{r}
+df3 <- df2eq %>% 
+  mutate(prePost = factor(prePost, c( 'PreNbr', 'postNbr'), ordered = T)) %>% 
+  dplyr::select(plotid, prePost, nbr) %>%
+  group_by(plotid) %>% 
+  mutate(diff = lag(nbr, 1) - nbr) %>%
+  dplyr::select(plotid, diff) %>%
+  drop_na()
+df3
+```
+# Merge with orginal data table
+
+```{r}
+
+data_dnbr = all_df %>% 
+  left_join(df3, by="plotid") %>%
+  dplyr::select(plotid:endYear, diff) %>%
+  rename(dnbr = diff) %>%
+  drop_na()
+
+data_dnbr
+```
+
+
+```{r}
+ggplot(data = data_dnbr, aes(x=change, y=dnbr)) +
+  geom_boxplot()
+```
+
+```{r}
+harvest = data_dnbr %>%
+  filter(change=="Harvest")
+
+harvest
+```
+```{r}
+ggplot(data = harvest, aes(x=changeNote, y=dnbr)) +
+  geom_boxplot()
+
+```
+
+# Manual approach
+```{r}
+
+dnbr1 = all_df %>%
+  filter(startYear==1984) %>%
+  filter(endYear==1985) %>%
+  mutate(dnbr = nbr1984-nbr1985) %>%
+  dplyr::select(plotid:endYear, nbr1984, nbr1985, dnbr)
+dnbr1
+```
+
+```{r}
+
+dnbr2 = all_df %>%
+  filter(startYear==1985) %>%
+  filter(endYear==1986) %>%
+  mutate(dnbr = nbr1985-nbr1986) %>%
+  dplyr::select(plotid:endYear, nbr1985, nbr1986, dnbr)
+
+dnbr2
+```
+
+```{r}
+
+dnbr3 = all_df %>%
+  filter(startYear==1986) %>%
+  filter(endYear==1987) %>%
+  mutate(dnbr = nbr1986-nbr1987) %>%
+  dplyr::select(plotid:endYear, nbr1986, nbr1987, dnbr)
+
+dnbr3
+```
+
+```{r}
+
+dnbr4 = all_df %>%
+  filter(startYear==1987) %>%
+  filter(endYear==1988) %>%
+  mutate(dnbr = nbr1987-nbr1988) %>%
+  dplyr::select(plotid:endYear, nbr1987, nbr1988, dnbr)
+
+dnbr4
+```
+
+
+```{r}
+
+dnbr5 = all_df %>%
+  filter(startYear==1988) %>%
+  filter(endYear==1989) %>%
+  mutate(dnbr = nbr1988-nbr1989) %>%
+  dplyr::select(plotid:endYear, nbr1988, nbr1989, dnbr)
+
+dnbr5
+```
+```{r}
+
+dnbr6 = all_df %>%
+  filter(startYear==1989) %>%
+  filter(endYear==1990) %>%
+  mutate(dnbr = nbr1989-nbr1990) %>%
+  dplyr::select(plotid:endYear, nbr1989, nbr1990, dnbr)
+
+dnbr6
+```
+
+```{r}
+
+dnbr7 = all_df %>%
+  filter(startYear==1990) %>%
+  filter(endYear==1991) %>%
+  mutate(dnbr = nbr1990-nbr1991) %>%
+  dplyr::select(plotid:endYear, nbr1990, nbr1991, dnbr)
+
+dnbr7
+```
+
+```{r}
+
+dnbr8 = all_df %>%
+  filter(startYear==1991) %>%
+  filter(endYear==1992) %>%
+  mutate(dnbr = nbr1991-nbr1992) %>%
+  dplyr::select(plotid:endYear, nbr1991, nbr1992, dnbr)
+
+dnbr8
+```
+
+```{r}
+
+dnbr9 = all_df %>%
+  filter(startYear==1992) %>%
+  filter(endYear==1993) %>%
+  mutate(dnbr = nbr1992-nbr1993) %>%
+  dplyr::select(plotid:endYear, nbr1992, nbr1993, dnbr)
+
+dnbr9
+```
+
+```{r}
+
+dnbr10 = all_df %>%
+  filter(startYear==1993) %>%
+  filter(endYear==1994) %>%
+  mutate(dnbr = nbr1993-nbr1994) %>%
+  dplyr::select(plotid:endYear, nbr1993, nbr1994, dnbr)
+
+dnbr10
+```
+
+```{r}
+
+dnbr11 = all_df %>%
+  filter(startYear==1994) %>%
+  filter(endYear==1995) %>%
+  mutate(dnbr = nbr1994-nbr1995) %>%
+  dplyr::select(plotid:endYear, nbr1994, nbr1995, dnbr)
+
+dnbr11
+```
+
+```{r}
+
+dnbr12 = all_df %>%
+  filter(startYear==1995) %>%
+  filter(endYear==1996) %>%
+  mutate(dnbr = nbr1995-nbr1996) %>%
+  dplyr::select(plotid:endYear, nbr1995, nbr1996, dnbr)
+
+dnbr12
+```
+
+```{r}
+
+dnbr13 = all_df %>%
+  filter(startYear==1996) %>%
+  filter(endYear==1997) %>%
+  mutate(dnbr = nbr1996-nbr1997) %>%
+  dplyr::select(plotid:endYear, nbr1996, nbr1997, dnbr)
+
+dnbr13
+```
+
+```{r}
+
+dnbr14 = all_df %>%
+  filter(startYear==1997) %>%
+  filter(endYear==1998) %>%
+  mutate(dnbr = nbr1997-nbr1998) %>%
+  dplyr::select(plotid:endYear, nbr1997, nbr1998, dnbr)
+
+dnbr14
+```
+
+```{r}
+
+dnbr15 = all_df %>%
+  filter(startYear==1997) %>%
+  filter(endYear==1998) %>%
+  mutate(dnbr = nbr1997-nbr1998) %>%
+  dplyr::select(plotid:endYear, nbr1997, nbr1998, dnbr)
+
+dnbr15
+```
