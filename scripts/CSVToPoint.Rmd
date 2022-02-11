@@ -34,6 +34,8 @@ library(sf)
 
 # Data
 
+## CSV
+
 ```{r}
 df = read.csv("../data/recovery_study_ts_segments.csv")
 ```
@@ -49,7 +51,7 @@ str(df)
 unique(df$startYear)
 ```
 
-# States
+## States
 ```{r}
 states= st_read("../data/states-shapefile/s_11au16.shp", "s_11au16")
 ```
@@ -82,14 +84,22 @@ lower48
 ```{r}
 lower48_proj <- st_transform(lower48, us_proj)
 ```
+
 # Data frame to  points (spatial dataframe)
 
+## add row number
+```{r}
+df1 = df %>% 
+  unite("id", plotid, startYear, remove = FALSE)
+
+df1
+```
 
 Define coordinates and generate spatial point data frame with attributes
 
 ```{r}
-coords_df = cbind(df$x, df$y)
-df_pt <- SpatialPointsDataFrame(coords_df, proj4string = CRS(us_proj), data = df)
+coords_df = cbind(df1$x, df1$y)
+df_pt <- SpatialPointsDataFrame(coords_df, proj4string = CRS(us_proj), data = df1)
 ```
 
 
@@ -108,7 +118,7 @@ df_states = st_join(st_make_valid(df_pt_sf), lower48_proj, largest=TRUE)
 
 ```{r}
 df_states1 = df_states %>% 
-  dplyr::select(plotid:NAME, geometry) 
+  dplyr::select(id, plotid:NAME, geometry) 
 ```
 
 ```{r}
