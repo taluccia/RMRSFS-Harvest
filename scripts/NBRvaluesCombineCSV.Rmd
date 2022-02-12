@@ -16,6 +16,13 @@ library(tidyverse)
 
 
 # Data
+## Orginal Data
+```{r}
+dforg = read.csv('../data/csv/data-uniqueID.csv')
+```
+
+
+## NBR data
 ```{r}
 df1984 = read.csv('../data/NBR-US-States/2022-02-09_USHarvestNBRValues1984.csv')
 df1985 = read.csv('../data/NBR-US-States/2022-02-09_USHarvestNBRValues1985.csv')
@@ -61,6 +68,19 @@ df2014 = read.csv('../data/NBR-US-States/2022-02-09_USHarvestNBRValues2014.csv')
 df2015 = read.csv('../data/NBR-US-States/2022-02-09_USHarvestNBRValues2015.csv')
 df2016 = read.csv('../data/NBR-US-States/2022-02-09_USHarvestNBRValues2016.csv')
 ```
+
+# Original Data
+```{r}
+dforg1 = dforg %>% 
+  dplyr::select(id, startLC1:endLC2) %>%
+  unite("change1", startLC1, endLC1, remove = FALSE) %>%
+  unite("change2", startLC2, endLC2, remove = FALSE) %>%
+  unite("change3", change1, endLC2, remove = FALSE) 
+
+dforg1
+```
+
+# NBR data combine
 ```{r}
 df1984
 ```
@@ -131,15 +151,19 @@ all_df = df_list %>% reduce(full_join, by=c("id", "plotid", "NAME", "STATE", "ch
 all_df
 ```
 ```{r}
-n_distinct(all_df$plotid)
-```
-```{r}
-unique(all_df$plotid)
+n_distinct(all_df$id)
 ```
 
+# Join Original with NBR
+```{r}
+all_df1 = full_join(all_df, dforg1, by=c("id"))
+all_df1
+```
+
+# Reorganize
 ```{r}
 
-df2 = all_df %>%  rename("1984" = "nbr1984", 
+df2 = all_df1 %>%  rename("1984" = "nbr1984", 
                    "1985" = "nbr1985", 
                    "1986" = "nbr1986", 
                    "1987" = "nbr1987", 
@@ -180,8 +204,8 @@ df2
 ```{r}
 
 df3 = df2 %>%
-  pivot_longer(!c("id", "plotid", "NAME", "STATE", "change", "changeNote", "startYear", "endYear"), names_to = "nbrYr", values_to = "nbr") %>%
-  pivot_longer(!c("id", "plotid", "NAME", "STATE", "change", "changeNote", "nbrYr", "nbr"), names_to = "startEnd", values_to = "year") %>%
+  pivot_longer(!c("id", "plotid", "NAME", "STATE", "change", "changeNote", "startYear", "endYear", "change1", "startLC1", "endLC1", "change2", "startLC2", "endLC2", "change3"), names_to = "nbrYr", values_to = "nbr") %>%
+  pivot_longer(!c("id", "plotid", "NAME", "STATE", "change", "changeNote", "nbrYr", "nbr",  "change1", "startLC1", "endLC1", "change2", "startLC2", "endLC2", "change3"), names_to = "startEnd", values_to = "year") %>%
   mutate(prePost = ifelse(startEnd == "startYear", "preNbr", "postNbr")) 
 
 df3
@@ -192,19 +216,23 @@ df4 <- df3[df3$nbrYr==df3$year, ]
 
 df4
 ```
+```{r}
+str(df4$prePost)
+```
+
 letter = ifelse(grade %in% 60:69, "D",
  mutate(prePost = factor(prePost, c( 'PreNbr', 'postNbr'), ordered = T)) 
-```{r}
+```{r eval=FALSE, include=FALSE}
 df5 <- df4 %>% 
   mutate(prePost = factor(ifelse(startEnd == "startYear", "preNBR", "postNBR"), ordered = T)) 
 
 df5
 ```  
 ```{r}
-df6 = df5 %>%
+df5 = df4 %>%
   group_by(id) %>% 
   mutate(diff = lag(nbr, 1) - nbr) 
-df6
+df5
 ```
 
 %>%
@@ -213,71 +241,119 @@ df6
 
 
 ```{r}
-df7 = df6 %>% dplyr::select(id, plotid, NAME, change, changeNote, diff) %>%
+df6 = df5 %>% dplyr::select(id, plotid, NAME, change, changeNote, change1, change2, change3, startLC1, endLC1, startLC2, endLC2, diff) %>%
   rename(dnbr = diff) %>%
-  drop_na()
+  drop_na() %>%
+  filter(change=="Harvest")
 
-df7
+df6
   
 ```
 ```{r}
-plot1 = ggplot(data = df7, aes(x=change, y=dnbr)) +
+df7 = df6 %>% filter(change1 %in% c("Trees_Trees", "Trees_Shrubs", "Trees_Grass/forb/herb", "Trees_Barren"))
+df7
+```
+```{r}
+unique(df6$endLC2)
+
+df6 %>% filter(endLC2=="trees")
+```
+```{r}
+target_endLC1 = c("Trees", "Grass/forb/herb", "Barren", "Shrubs")
+target_endLC2 = c("trees", "grassForbHerb", "grassForbHerb|naturalBarren", "shrubs", "naturalBarren" )
+df8 = df6 %>% 
+  filter(startLC1 =="Trees") %>%
+  filter(endLC1 %in% target_endLC1) %>%
+  filter(endLC2 %in% target_endLC2)
+
+df8
+```
+
+
+# Plots
+```{r}
+plot1 = ggplot(data = df7, aes(x=dnbr, y=change1)) +
   geom_boxplot()
 
 plot1
 ```
-
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/boxplot1.png", plot = plot1, width = 6, height = 4, units = c("in"), dpi = 600)
 ```
 
 ```{r}
-df8 = df7 %>% filter(change=="Harvest")
+p11 = ggplot(data = df7, aes(x=dnbr, y=change3)) +
+  geom_boxplot()
 
-df8
+p11
+```
+
+
+
+```{r}
+p2 <- df7 %>%
+  ggplot( aes(x=dnbr, fill=change1)) +
+    geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') +
+    scale_fill_manual(values=c("#69b3a2", "#404080", "#b3697a", "#7ab369")) +
+    theme_bw() +
+    labs(fill="")
+
+p2
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/HistogramOverlap.png", plot = p2, width = 6, height = 6, units = c("in"), dpi = 600)
 ```
 
 ```{r}
-plot2 = ggplot(data = df8, aes(x=changeNote, y=dnbr)) +
+p3 <- df7 %>%
+  ggplot( aes(x=dnbr, fill=change1)) +
+    geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity', binwidth = 50) +
+    scale_fill_manual(values=c("#69b3a2", "#404080", "#b3697a", "#7ab369")) +
+    theme_bw() +
+    labs(fill="") +
+  facet_wrap(~change1)
+
+p3
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/HistogramFacetLC1.png", plot = p3, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+
+```{r}
+p4 <- df8 %>%
+  ggplot( aes(x=dnbr, fill=change3)) +
+    geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity', binwidth = 50) +
+    scale_fill_manual(values=c("#69b3a2", "#404080", "#b3697a", "#7ab369", "#69b3a2", "#404080", "#b3697a", "#7ab369", "#69b3a2", "#404080", "#b3697a", "#7ab369", "#69b3a2")) +
+    theme_bw() +
+    labs(fill="") +
+  facet_wrap(~change3) + 
+  theme(legend.position="none")
+  
+
+p4
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/HistgramFacetLC1LC2.png", plot = p4, width =11, height = 8, units = c("in"), dpi = 600)
+```
+
+
+
+```{r}
+plot2 = ggplot(data = df8, aes(x=dnbr, y=change3)) +
   geom_boxplot()
 
 plot2
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/boxplot2.png", plot = plot2, width = 6, height = 4, units = c("in"), dpi = 600)
-```
-
-# Merge with orginal data table
-
-```{r}
-
-data_dnbr = all_df %>% 
-  left_join(df3, by="plotid") %>%
-  dplyr::select(plotid:endYear, diff) %>%
-  rename(dnbr = diff) %>%
-  drop_na()
-
-data_dnbr
+ggsave("../figures/boxplotLC1LC2.png", plot = plot2, width = 8, height = 7, units = c("in"), dpi = 600)
 ```
 
 
-```{r}
-ggplot(data = data_dnbr, aes(x=change, y=dnbr)) +
-  geom_boxplot()
-```
-
-```{r}
-harvest = data_dnbr %>%
-  filter(change=="Harvest")
-
-harvest
-```
-```{r}
-ggplot(data = harvest, aes(x=changeNote, y=dnbr)) +
-  geom_boxplot()
-
-```
 
 # Manual approach
 ```{r}
