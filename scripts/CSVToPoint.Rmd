@@ -94,7 +94,9 @@ df1 = df %>%
 
 df1
 ```
-
+```{r eval=FALSE, include=FALSE}
+write.csv(df1, '../outputs/csv/data-uniqueID.csv',  row.names = FALSE)
+```
 Define coordinates and generate spatial point data frame with attributes
 
 ```{r}
