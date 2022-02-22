@@ -200,6 +200,9 @@ df2 = all_df1 %>%  rename("1984" = "nbr1984",
 
 df2
 ```
+```{r eval=FALSE, include=FALSE}
+write.csv(df2, '../outputs/csv/dataAllNBRYears.csv',  row.names = FALSE)
+```
 
 ```{r}
 
@@ -210,7 +213,9 @@ df3 = df2 %>%
 
 df3
 ```
-
+```{r eval=FALSE, include=FALSE}
+write.csv(df3, '../outputs/csv/dataAllNBRYearsLongFormData.csv',  row.names = FALSE)
+```
 ```{r}
 df4 <- df3[df3$nbrYr==df3$year, ]
 
@@ -268,7 +273,19 @@ df8 = df6 %>%
 
 df8
 ```
+```{r}
+target_notes = c("thinning", "clearcut")
+df9 = df6 %>% filter(changeNote %in% target_notes)
 
+df9
+```
+
+```{r}
+
+df10 = df5 %>% filter(changeNote == "clearcut")
+
+df10
+```
 
 # Plots
 ```{r}
@@ -353,6 +370,20 @@ plot2
 ggsave("../figures/boxplotLC1LC2.png", plot = plot2, width = 8, height = 7, units = c("in"), dpi = 600)
 ```
 
+```{r}
+p5 <- df9 %>%
+  ggplot( aes(x=dnbr, fill=changeNote)) +
+    geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') +
+    scale_fill_manual(values=c("#69b3a2", "#404080")) +
+    theme_bw() +
+    labs(fill="")
+
+p5
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/HistogramOverlapChangeNotes.png", plot = p5, width = 6, height = 4, units = c("in"), dpi = 600)
+```
 
 
 # Manual approach
