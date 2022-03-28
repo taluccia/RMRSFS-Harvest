@@ -1,0 +1,153 @@
+---
+title: "EPA Level 1"
+output: html_document
+---
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+# Overview
+
+Create spatial points data  fram  for plots that burned from 2001 to present. Point data will be used  to extract  dnbr and RdNBR values from satellite imagery of of burn severity  calculations.
+
+# Pakcages
+```{r}
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(sp) # spatial data
+library(rgdal) # geospatial data
+library(raster) # deals with rasters
+library(ggplot2)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(latticeExtra)
+library(sf)
+```
+
+## EPA Ecoregions
+```{r}
+eco= st_read("../data/na_cec_eco_l1/NA_CEC_Eco_Level1.shp", "NA_CEC_Eco_Level1")
+```
+
+## States
+```{r}
+states= st_read("../data/states-shapefile/s_11au16.shp", "s_11au16")
+```
+
+
+# Projections
+USA Contiguous Albers Equal Area Conic, USGS (EPSG = 5070 or 102003)
+https://guides.library.duke.edu/r-geospatial/CRS
+
++proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
+```{r}
+us_proj = "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+```
+
+
+```{r}
+st_crs(states)
+```
+
+
+```{r}
+st_crs(eco)
+```
+
+# View Attributes
+
+
+```{r}
+head(eco)
+```
+
+```{r}
+head(states)
+```
+
+# Filter and reproject Data
+
+## Filter states
+```{r}
+lower48 = states %>%
+  filter(!NAME %in% c('Alaska', 'American Samoa', 'Puerto Rico', "Virgin Islands", "Guam", "Northern Marianas", "Hawaii" )) %>%
+  st_transform(st_crs(us_proj))
+
+lower48
+```
+
+```{r}
+unique(lower48$NAME)
+```
+
+## Filter states
+```{r}
+east_states = lower48 %>%
+  filter(NAME %in% c("Alabama" , "Arkansas", "Connecticut", "District of Columbia", "Delaware", "Florida", "Georgia", "Illinois", "Indiana", "Iowa" , "Kentucky",  "Louisiana", "Massachusetts", "Maine", "Michigan", "Minnesota", "Mississippi", "North Carolina", "New Hampshire", "New Jersey", "New York", "Ohio", "Pennsylvania", "Rhode Island", "Tennessee", "Virginia", "Vermont", "Wisconsin", "West Virginia",  "Missouri", "South Carolina", "Maryland", "Oklahoma",   "Texas")) 
+
+east_states
+```
+
+```{r}
+west_states = lower48 %>%
+  filter(!NAME %in% c("Alabama" , "Arkansas", "Connecticut", "District of Columbia", "Delaware", "Florida", "Georgia", "Illinois", "Indiana", "Iowa" , "Kentucky",  "Louisiana", "Massachusetts", "Maine", "Michigan", "Minnesota", "Mississippi", "North Carolina", "New Hampshire", "New Jersey", "New York", "Ohio", "Pennsylvania", "Rhode Island", "Tennessee", "Virginia", "Vermont", "Wisconsin", "West Virginia",  "Missouri", "South Carolina", "Maryland", "Oklahoma",   "Texas")) 
+
+west_states
+```
+
+## Filter Ecoregions
+
+```{r}
+east_eco = eco %>% 
+  filter(NA_L1CODE %in% c(8)) %>% 
+  st_transform(st_crs(us_proj))
+
+east_eco
+```
+
+```{r}
+west_eco = eco %>% 
+  filter(NA_L1CODE %in% c(6, 7, 9, 10, 11, 12, 13)) %>% 
+  st_transform(st_crs(us_proj))
+
+west_eco
+```
+
+# Crop by Low 48 states
+
+```{r}
+east_eco_cropped<-st_intersection( east_eco$geometry, lower48$geometry)
+```
+
+```{r}
+west_eco_cropped<-st_difference( west_eco$geometry, lower48$geometry)
+```
+
+# Visualize data
+
+````{r}
+plot(st_geomtry(east_eco_cropped))
+
+```
+
+
+# Write to shapefile
+```{r eval=FALSE, include=FALSE}
+st_write(east_states, "../outputs/eco_polygons/EastStates.shp", driver="ESRI Shapefile")
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(west_states, "../outputs/eco_polygons/WestStates.shp", driver="ESRI Shapefile")
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(east_eco_cropped, "../outputs/eco_polygons/Ecoregions1_East.shp", driver="ESRI Shapefile")
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(west_eco_cropped, "../outputs/eco_polygons/Ecoregions1_West.shp", driver="ESRI Shapefile")
+```

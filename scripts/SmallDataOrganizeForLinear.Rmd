@@ -1,0 +1,96 @@
+---
+title: "Small Raster organize for lm"
+output: html_document
+---
+
+# Packages
+```{r message=FALSE, warning=FALSE}
+
+library(ggplot2)
+library(tidyverse)
+library(broom)
+```
+
+
+```{r}
+df = read.csv('../data/csv/OR3000.csv')
+```
+
+```{r}
+head(df)
+
+```
+```{r}
+df1 = df %>% dplyr::select(year1:harvestYr) %>%
+  rename("1"=year1, "2"=year2, "3"=year3, "4"=year4, "5"=year5, "6"=year6) %>%
+  mutate(location = row_number()) %>%
+  pivot_longer(
+    cols = 1:6,
+    names_to = "recoveryYr",
+    values_to = "nbr",
+    values_drop_na = TRUE
+  )
+
+df1
+```
+
+```{r}
+locations<-c("a","b","c")
+
+proportion.I<-c(0.073846154, 0.079710145, 0.063218391)
+
+proportion.II<-c(0.049773659, 0.033756955, 0.011237956)
+
+proportion.III<-c(0.090322581, 0.100917431, 0.08051443)
+
+abundance.I<-c(331,331,331)
+
+abundance.II<-c(178,178,178)
+
+abundance.III<-c(87,87,87)
+
+output.slope<-c(5.539e-05, -4.665e-05, -2.819e-05)
+
+output.intercept<-c(5.128e-02, 8.073e-02, 5.726e-02)
+
+df<-data.frame(locations, proportion.I, proportion.II, proportion.III, abundance.I, abundance.II, abundance.III, output.slope, output.intercept)
+```
+
+```{r}
+df
+```
+
+```{r}
+df %>% 
+  select(-starts_with("output")) %>%                   #drop "answers"
+  pivot_longer(proportion.I:abundance.III) %>%         # convert to long format
+  separate(name, into = c("var", "idx")) %>%           # get values from column names
+  pivot_wider(names_from=var, values_from=value) %>%   # go back to wide
+  nest(data=-locations) %>%                             
+  mutate(reg = map(data, ~lm(abundance~proportion, .))) %>%   # do the regression
+  mutate(intercept=map_dbl(reg, ~coefficients(.)[1]),         # get values form regression
+         slope=map_dbl(reg, ~coefficients(.)[2]))
+
+```
+
+```{r}
+df1
+```
+```{r}
+model = df1 %>%
+  dplyr::select(location:nbr) %>%
+  nest(data=-location) %>%                             
+  mutate(reg = map(data, ~lm(nbr~recoveryYr, .))) %>%   # do the regression
+  mutate(intercept=map_dbl(reg, ~coefficients(.)[1]),         # get values form regression
+         slope=map_dbl(reg, ~coefficients(.)[2]))
+
+model
+```
+
+```{r}
+model %>% mutate(intercept = round(intercept ,digit=2)) %>% mutate(slope = round(slope,digit=2)) %>% filter(slope <0)
+```
+
+
+
+

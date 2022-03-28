@@ -1,0 +1,266 @@
+---
+title: "RGB Images"
+output: html_document
+---
+
+# Packages
+```{r message=FALSE, warning=FALSE}
+
+library(ggplot2)
+
+library(sf)
+library(ggmap) # devtools::install_github("dkahle/ggmap")
+library(ggrepel)
+library(RStoolbox)
+library(raster)
+library(rgdal)
+library(rasterVis)
+library(RColorBrewer)
+library(cowplot)
+library(ggspatial)
+library(maps)
+library(maptools)
+library(rgeos)
+library(sp)
+library(mapproj)
+```
+
+## Raster
+```{r}
+stack85 <- stack("../data/ExampleRasters/medoidComposite1985.tif")
+stack86 <- stack("../data/ExampleRasters/medoidComposite1986.tif")
+stack87 <- stack("../data/ExampleRasters/medoidComposite1987.tif")
+stack88 <- stack("../data/ExampleRasters/medoidComposite1988.tif")
+stack89 <- stack("../data/ExampleRasters/medoidComposite1989.tif")
+stack90 <- stack("../data/ExampleRasters/medoidComposite1990.tif")
+stack91 <- stack("../data/ExampleRasters/medoidComposite1991.tif")
+stack92 <- stack("../data/ExampleRasters/medoidComposite1992.tif")
+```
+
+```{r}
+stack85swir <- stack("../data/ExampleRasters/medoidCompositeSWIR1985.tif")
+stack86swir <- stack("../data/ExampleRasters/medoidCompositeSWIR1986.tif")
+stack87swir <- stack("../data/ExampleRasters/medoidCompositeSWIR1987.tif")
+stack88swir <- stack("../data/ExampleRasters/medoidCompositeSWIR1988.tif")
+stack89swir <- stack("../data/ExampleRasters/medoidCompositeSWIR1989.tif")
+stack90swir <- stack("../data/ExampleRasters/medoidCompositeSWIR1990.tif")
+stack91swir <- stack("../data/ExampleRasters/medoidCompositeSWIR1991.tif")
+stack92swir <- stack("../data/ExampleRasters/medoidCompositeSWIR1992.tif")
+```
+
+```{r}
+stack85
+```
+
+```{r}
+extent(stack85)
+```
+
+
+
+
+
+
+```{r}
+plot(stack85)
+```
+na.value = "transparent"
+  coord_sf(xlim = c(-2200620, -2191470 ), ylim = c(2627190, 2635560 )) 
+
+
+```{r fig.height=1, fig.width=1}
+
+plot85 = ggRGB(stack85, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1985")
+
+plot85
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRaster1985.png", plot = plot85, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+plot86 = ggRGB(stack86, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1986")
+
+plot86
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRaster1986.png", plot = plot86, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+plot87 = ggRGB(stack87, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1987")
+
+plot87
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRaster1987.png", plot = plot87, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+plot88 = ggRGB(stack88, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1988")
+
+plot88
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRaster1988.png", plot = plot88, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+plot89 = ggRGB(stack89, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1989")
+
+plot89
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRaster1989.png", plot = plot89, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+plot90 = ggRGB(stack90, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1990")
+
+plot90
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRaster1990.png", plot = plot90, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+plot91 = ggRGB(stack91, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1991")
+
+plot91
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRaster1991.png", plot = plot91, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+plot92 = ggRGB(stack92, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1992")
+
+plot92
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRaster1992.png", plot = plot92, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+
+# Swir Plots
+```{r fig.height=1, fig.width=1}
+
+swirplot85 = ggRGB(stack85swir, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1985")
+
+swirplot85
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRasterswir1985.png", plot = swirplot85, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+swirplot86 = ggRGB(stack86swir, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1986")
+
+swirplot86
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRasterswir1986.png", plot = swirplot86, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+swirplot87 = ggRGB(stack87swir, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1987")
+
+swirplot87
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRasterswir1987.png", plot = swirplot87, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+swirplot88 = ggRGB(stack88swir, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1988")
+
+swirplot88
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRasterswir1988.png", plot = swirplot88, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+swirplot89 = ggRGB(stack89swir, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1989")
+
+swirplot89
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRasterswir1989.png", plot = swirplot89, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+swirplot90 = ggRGB(stack90swir, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1990")
+
+swirplot90
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRasterswir1990.png", plot = swirplot90, width = 1, height = 1, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=1, fig.width=1}
+
+swirplot91 = ggRGB(stack91swir, r=1, g=2, b=3,  coord_equal = TRUE) +
+  theme_void() +
+  ggtitle("1991")
+
+swirplot91
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ExampleRasterswir1991.png", plot = swirplot91, width = 1, height = 1, units = c("in"), dpi = 600)
+```

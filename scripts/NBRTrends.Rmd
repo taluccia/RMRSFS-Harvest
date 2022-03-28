@@ -1,0 +1,547 @@
+---
+title: "NBR Trends"
+output: html_document
+---
+
+# Overview
+
+
+# Packages
+
+```{r}
+library(tidyverse)
+```
+
+# Data
+```{r}
+data = read.csv( '../data/csv/dataAllNBRYears.csv')
+```
+
+```{r}
+longdata = read.csv( '../data/csv/dataAllNBRYearsLongFormData.csv')
+```
+
+```{r}
+head(data)
+head(longdata)
+```
+# Filter Data
+
+```{r}
+
+data1 = data %>% filter(changeNote=="clearcut")
+longdata1 = longdata %>% filter(changeNote=="clearcut")
+```
+
+```{r}
+
+longdata1 %>% 
+  group_by(startEnd) %>% 
+  filter(year=="1984") %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + theme(legend.position="none")
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1984", "1985", "1986","1987", "1988", "1989", "1990", "1991")
+start1984 = longdata1 %>% 
+  filter(startEnd=="startYear") %>%  
+  filter(year=="1984") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1984
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1984.png", plot = start1984, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c( "1985", "1986","1987", "1988", "1989", "1990", "1991", "1992")
+start1985 = longdata1 %>% 
+  filter(startEnd=="startYear") %>%  
+  filter(year=="1985") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1985
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1985.png", plot = start1985, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r}
+longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1986") %>%
+  filter(nbrYr %in% target_yrs) 
+
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1986","1987", "1988", "1989", "1990", "1991", "1992", "1993")
+start1986 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1986") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1986
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1986.png", plot = start1986, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994")
+start1987 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1987") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1987
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1987.png", plot = start1987, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995")
+start1988 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1988") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1988
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1988.png", plot = start1988, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c( "1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996")
+start1989 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1989") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1989
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1989.png", plot = start1989, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c( "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997")
+start1990 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1990") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1990
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1990.png", plot = start1990, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998")
+start1991 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1991") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1991
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1991.png", plot = start1991, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999")
+start1992 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1992") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1992
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1992.png", plot = start1992, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000")
+start1993 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1993") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1993
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1993.png", plot = start1993, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001")
+start1994 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1994") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1994
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1994.png", plot = start1994, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002")
+start1995 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1995") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1995
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1995.png", plot = start1995, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003")
+start1996 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1996") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1996
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1996.png", plot = start1996, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004")
+start1997 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1997") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1997
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1997.png", plot = start1997, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005")
+start1998 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1998") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1998
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1998.png", plot = start1998, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006")
+start1999 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="1999") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start1999
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart1999.png", plot = start1999, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007")
+start2000 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2000") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2000
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2000.png", plot = start2000, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008")
+start2001 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2001") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2001
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2001.png", plot = start2001, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009")
+start2002 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2002") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2002
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2002.png", plot = start2002, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010")
+start2003 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2003") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2003
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2003.png", plot = start2003, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c( "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011")
+start2004 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2004") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2004
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2004.png", plot = start2004, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012")
+start2005 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2005") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2005
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2005.png", plot = start2005, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013")
+start2006 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2006") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2006
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2006.png", plot = start2006, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c( "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014")
+start2007 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2007") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2007
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2007.png", plot = start2007, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015")
+start2008 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2008") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2008
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2008.png", plot = start2008, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016")
+start2009 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2009") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2009
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2009.png", plot = start2009, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c( "2010", "2011", "2012", "2013", "2014", "2015", "2016")
+start2010 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2010") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2010
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2010.png", plot = start2010, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c( "2011", "2012", "2013", "2014", "2015", "2016", "2017")
+start2011 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2011") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2011
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2011.png", plot = start2011, width = 6, height = 6, units = c("in"), dpi = 600)
+```
+
+```{r fig.height=6, fig.width=6}
+target_yrs = c("2012", "2013", "2014", "2015", "2016", "2017", "2018")
+start2012 = longdata1 %>% 
+  filter(startEnd=="startYear") %>% 
+  filter(year=="2012") %>%
+  filter(nbrYr %in% target_yrs) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = id)) +
+  geom_point() +
+  facet_wrap(~id) + 
+  theme(legend.position="none", axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+start2012
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterNBRstart2012.png", plot = start2012, width = 6, height = 6, units = c("in"), dpi = 600)
+```

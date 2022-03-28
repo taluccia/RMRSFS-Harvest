@@ -1,0 +1,140 @@
+---
+title: "Samll Raster Stack"
+output: html_document
+---
+
+
+# Packages
+```{r message=FALSE, warning=FALSE}
+
+library(ggplot2)
+
+library(sf)
+library(ggmap) # devtools::install_github("dkahle/ggmap")
+library(ggrepel)
+library(RStoolbox)
+library(raster)
+library(rgdal)
+library(rasterVis)
+library(RColorBrewer)
+library(cowplot)
+library(ggspatial)
+library(maps)
+library(maptools)
+library(rgeos)
+library(sp)
+library(mapproj)
+```
+
+## Raster
+```{r}
+r85 <- stack("../data/RasterStackSmall/OregonImageStackSmall1985.tif")
+r86 <- stack("../data/RasterStackSmall/OregonImageStackSmall1986.tif")
+r87 <- stack("../data/RasterStackSmall/OregonImageStackSmall1987.tif")
+r88 <- stack("../data/RasterStackSmall/OregonImageStackSmall1988.tif")
+r89 <- stack("../data/RasterStackSmall/OregonImageStackSmall1989.tif")
+r90 <- stack("../data/RasterStackSmall/OregonImageStackSmall1990.tif")
+r91 <- stack("../data/RasterStackSmall/OregonImageStackSmall1991.tif")
+r92 <- stack("../data/RasterStackSmall/OregonImageStackSmall1992.tif")
+r93 <- stack("../data/RasterStackSmall/OregonImageStackSmall1993.tif")
+```
+
+```{r}
+r85
+```
+
+```{r}
+r93
+```
+
+```{r}
+plot(r85)
+```
+
+```{r}
+as.data.frame(r85)
+```
+
+```{r}
+df85 <- as.data.frame(r85) %>% drop_na() %>% mutate(harvestYr = 1985) %>% 
+  rename(year0=nbr1985, year1=nbr1986, year2=nbr1987, year3=nbr1988, year4=nbr1989, year5=nbr1990, year6=nbr1991)
+```
+
+```{r}
+df86 <- as.data.frame(r86) %>% drop_na() %>% mutate(harvestYr = 1986) %>% 
+  rename(year0=nbr1986, year1=nbr1987, year2=nbr1988, year3=nbr1989, year4=nbr1990, year5=nbr1991, year6=nbr1992)
+
+df87 <- as.data.frame(r87) %>% drop_na() %>% mutate(harvestYr = 1987) %>% 
+  rename(year0=nbr1987, year1=nbr1988, year2=nbr1989, year3=nbr1990, year4=nbr1991, year5=nbr1992, year6=nbr1993)
+
+df88 <- as.data.frame(r88) %>% drop_na() %>% mutate(harvestYr = 1988) %>% 
+  rename(year0=nbr1988, year1=nbr1989, year2=nbr1990, year3=nbr1991, year4=nbr1992, year5=nbr1993, year6=nbr1994)
+
+df89 <- as.data.frame(r89) %>% drop_na() %>% mutate(harvestYr = 1989) %>% 
+  rename(year0=nbr1989, year1=nbr1990, year2=nbr1991, year3=nbr1992, year4=nbr1993, year5=nbr1994, year6=nbr1995)
+
+df90 <- as.data.frame(r90) %>% drop_na() %>% mutate(harvestYr = 1990) %>% 
+  rename(year0=nbr1990, year1=nbr1991, year2=nbr1992, year3=nbr1993, year4=nbr1994, year5=nbr1995, year6=nbr1996)
+
+df91 <- as.data.frame(r91) %>% drop_na() %>% mutate(harvestYr = 1991) %>% 
+  rename(year0=nbr1991, year1=nbr1992, year2=nbr1993, year3=nbr1994, year4=nbr1995, year5=nbr1996, year6=nbr1997)
+
+df92 <- as.data.frame(r92) %>% drop_na() %>% mutate(harvestYr = 1992) %>% 
+  rename(year0=nbr1992, year1=nbr1993, year2=nbr1994, year3=nbr1995, year4=nbr1996, year5=nbr1997, year6=nbr1998)
+
+df93 <- as.data.frame(r93) %>% drop_na() %>% mutate(harvestYr = 1993) %>% 
+  rename(year0=nbr1993, year1=nbr1994, year2=nbr1995, year3=nbr1996, year4=nbr1997, year5=nbr1998, year6=nbr1999)
+```
+
+
+````{r}
+head(df85)
+```
+
+```{r}
+head(df86)
+head(df87)
+head(df88)
+head(df89)
+head(df90)
+head(df91)
+head(df92)
+head(df93)
+```
+
+```{r}
+allData = bind_rows(df85, df86, df87, df88, df89, df90, df91, df92, df93)
+```
+
+```{r}
+summary(allData)
+```
+
+```{r}
+allData1 = allData %>% rename(lng = longitude, lat = latitude)
+
+allData1
+```
+
+```{r}
+write.csv(allData1, '../outputs/OregonSmallData1985-1993.csv',  row.names = FALSE)
+```
+
+# Random Sample fo 3000
+
+```{r}
+data3000 = allData1 %>% sample_n(size=3000) %>%dplyr::select(year1:harvestYr)
+
+data3000
+```
+
+```{r}
+
+summary(data3000)
+str(data3000)
+unique(data3000$harvestYr)
+```
+
+```{r}
+write.csv(data3000, '../outputs/OR3000.csv',  row.names = FALSE)
+```

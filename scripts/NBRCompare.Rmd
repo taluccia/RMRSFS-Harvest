@@ -1,0 +1,970 @@
+---
+title: "NBR compare"
+output: html_document
+---
+
+# Overview
+
+
+# Packages
+
+```{r}
+library(tidyverse)
+library(cowplot)
+library(data.table)
+```
+
+# Define graph Theme and color Palette 
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+
+reg_theme = theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), 
+        legend.title = element_blank())
+
+```
+
+```{r}
+bar_theme = theme_bw() + 
+  theme(legend.position = "none", legend.title = element_blank()) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) 
+```
+
+```{r}
+ecoPalette <- c("#b5b35c", "#556b2f")
+```
+
+geom_point(size=1.5, shape=1, color= "grey50")  
+
+# Data
+```{r}
+data = read.csv( '../data/csv/dataAllNBRYears.csv')
+```
+
+```{r}
+longdata = read.csv( '../data/csv/dataAllNBRYearsLongFormData.csv')
+```
+
+```{r}
+head(longdata)
+```
+
+```{r}
+eco = read.csv( '../data/csv/Points-EcoRegions.csv')
+```
+
+# States for East and West
+
+```{r}
+east = c("Alabama" , "Arkansas", "Connecticut", "District of Columbia", "Delaware", "Florida", "Georgia", "Illinois", "Indiana", "Iowa" , "Kentucky",  "Louisiana", "Massachusetts", "Maine", "Michigan", "Minnesota", "Mississippi", "North Carolina", "New Hampshire", "New Jersey", "New York", "Ohio", "Pennsylvania", "Rhode Island", "Tennessee", "Virginia", "Vermont", "Wisconsin", "West Virginia",  "Missouri", "South Carolina", "Maryland")
+
+
+west = c("Arizona", "California", "Colorado", "Idaho", "Kansas", "Montana", "North Dakota", "Nebraska", "New Mexico",  "Nevada", "Oklahoma", "Oregon", "South Dakota",  "Texas", "Utah", "Washington", "Wyoming")
+```
+
+
+# Organize
+## Subset ecoregion dataframe
+```{r}
+eco1 = eco %>% dplyr::select(id, US_L3CODE:NA_L1NAME, EPA_REGION:L1_KEY)
+eco1
+```
+
+## Subset years of interest
+```{r}
+df <- longdata[longdata$nbrYr==longdata$year, ]
+
+df
+```
+
+## Reformat to wider
+```{r}
+df1 = df %>% dplyr::select(!nbrYr) %>%
+  pivot_wider(names_from = c(prePost, startEnd), 
+    values_from = c(nbr, year))
+
+df1
+```
+
+## Add dNBR and RdNBR
+```{r}
+
+df2 = df1 %>% mutate(dnbr = nbr_preNbr_startYear-nbr_postNbr_endYear) %>%
+  mutate(rdnbr_bottom = (sqrt(abs(nbr_preNbr_startYear/1000))))
+df2
+```
+```{r}
+df3 = df2 %>% mutate(rdnbr = dnbr/rdnbr_bottom) 
+df3
+```
+
+```{r}
+east_df = df3 %>% filter(NAME %in% east)
+east_df
+```
+
+```{r}
+west_df = df3 %>% filter(NAME %in% west)
+west_df
+```
+
+
+## Add EcoRegion Data
+```{r}
+df4 = merge(df3, eco1, by="id")
+df4
+```
+
+## Split States by East/West
+# Eco Region Data
+```{r}
+n_distinct(df4$US_L3NAME)
+n_distinct(df4$NA_L3NAME)
+n_distinct(df4$US_L2NAME)
+n_distinct(df4$US_L1NAME)
+n_distinct(df4$EPA_REGION)
+n_distinct(df4$L3_KEY)
+n_distinct(df4$NA_L2CODE)
+```
+# Calculate proportion Misclassified by threshold
+
+
+```{r}
+
+east_thresholds = east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+    summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300))) %>%
+  mutate(p_lte100 = n_lte100/n_count) %>%
+  mutate(p_lte150 = n_lte150/n_count) %>%
+  mutate(p_lte200 = n_lte200/n_count) %>%
+  mutate(p_lte250 = n_lte250/n_count) %>%
+  mutate(p_lte300 = n_lte300/n_count) 
+
+east_thresholds
+```
+```{r}
+write.csv(east_thresholds, '../outputs/east_thresholds.csv',  row.names = FALSE)
+```
+
+# Thresholds
+
+# Threshold calculate Overall Accuracy
+
+## East
+```{r}
+east_mult_thr = east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+  summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte125 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (675+1277)) 
+
+east_mult_thr
+```
+
+```{r}
+write.csv(east_mult_thr, '../outputs/Multiple_east_thresholds.csv',  row.names = FALSE)
+```
+
+```{r}
+east_thresholds2 = east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+  summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100 & rdnbr>=500)),
+              n_lte125 = length(which(nbr_postNbr_endYear <= 125 & rdnbr>=500)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150 & rdnbr>=500)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175 & rdnbr>=500)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200 & rdnbr>=500)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225 & rdnbr>=500)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250 & rdnbr>=500)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275 & rdnbr>=500)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300 & rdnbr>=500)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325 & rdnbr>=500)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350 & rdnbr>=500)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375 & rdnbr>=500))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (675+1277)) 
+
+east_thresholds2
+```
+
+```{r}
+write.csv(east_thresholds2, '../outputs/east_thresholds2.csv',  row.names = FALSE)
+```
+## West
+```{r}
+
+west_mult_thr = west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+    summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte125 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (190+445)) 
+  
+west_mult_thr
+```
+
+```{r}
+write.csv(west_mult_thr, '../outputs/Multiple_west_thresholds.csv',  row.names = FALSE)
+```
+
+## East
+```{r}
+east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+  summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte125 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  mutate(classified = changeNote)
+```
+# Threshold calculate Overall Accuracy
+
+## East
+```{r}
+east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+  summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte125 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (675+1277)) %>%
+  mutate(clearcut_accuracy = clearcut/Total*100) %>%
+  mutate(thinning_accuracy = thinning/Total*100)
+```
+
+## West
+```{r}
+
+west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+    summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte125 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (190+445)) %>%
+  mutate(prop_clearcut = clearcut/190) %>%
+  mutate(prop_thin = thinning/445)
+  
+
+```
+
+# Threshold calculate Omission Error
+
+## East
+```{r}
+east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+  summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (675+1277)) %>%
+  mutate(clearcut_accuracy = (675-clearcut)/Total*100) %>%
+  mutate(thinning_accuracy = (1277-thinning)/Total*100)
+```
+
+## West
+```{r}
+
+west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+    summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (190+445)) %>%
+  mutate(clearcut_accuracy = (190-clearcut)/Total*100) %>%
+  mutate(thinning_accuracy = (445-thinning)/Total*100)
+  
+
+```
+
+# Threshold calculate Comission Error
+
+## East
+```{r}
+east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+  summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (675+1277)) %>%
+  mutate(clearcut_accuracy = (675-clearcut)/Total*100) %>%
+  mutate(thinning_accuracy = (1277-thinning)/Total*100)
+```
+
+## West
+```{r}
+
+west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+    summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  pivot_longer(n_lte100:n_lte375, names_to = "threshold", values_to = "count") %>%
+  dplyr::select(!n_count) %>%
+  pivot_wider(names_from = changeNote, values_from = count) %>%
+   mutate(Total = (190+445)) %>%
+  mutate(clearcut_accuracy = (190-clearcut)/Total*100) %>%
+  mutate(thinning_accuracy = (445-thinning)/Total*100)
+  
+
+```
+
+# Threshold explore
+
+```{r}
+
+west_thresholds = west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+    summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100)),
+              n_lte125 = length(which(nbr_postNbr_endYear <= 125)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300)),
+              n_lte325 = length(which(nbr_postNbr_endYear <= 325)),
+              n_lte350 = length(which(nbr_postNbr_endYear <= 350)),
+              n_lte375 = length(which(nbr_postNbr_endYear <= 375))) %>%
+  mutate(p_lte100 = n_lte100/n_count) %>%
+  mutate(p_lte150 = n_lte150/n_count) %>%
+  mutate(p_lte200 = n_lte200/n_count) %>%
+  mutate(p_lte250 = n_lte250/n_count) %>%
+  mutate(p_lte300 = n_lte300/n_count) 
+
+west_thresholds
+```
+```{r}
+write.csv(west_thresholds, '../outputs/west_thresholds.csv',  row.names = FALSE)
+```
+
+```{r}
+west_thresholds2 = west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+   group_by(changeNote) %>%
+    summarize(n_count = n(),
+              n_lte100 = length(which(nbr_postNbr_endYear <= 100 & rdnbr>=500)),
+              n_lte125 = length(which(nbr_postNbr_endYear <= 125 & rdnbr>=500)),
+              n_lte150 = length(which(nbr_postNbr_endYear <= 150 & rdnbr>=500)),
+              n_lte175 = length(which(nbr_postNbr_endYear <= 175 & rdnbr>=500)),
+              n_lte200 = length(which(nbr_postNbr_endYear <= 200 & rdnbr>=500)),
+              n_lte225 = length(which(nbr_postNbr_endYear <= 225 & rdnbr>=500)),
+              n_lte250 = length(which(nbr_postNbr_endYear <= 250 & rdnbr>=500)),
+              n_lte275 = length(which(nbr_postNbr_endYear <= 275 & rdnbr>=500)),
+              n_lte300 = length(which(nbr_postNbr_endYear <= 300 & rdnbr>=500))) %>%
+  mutate(p_lte100 = n_lte100/n_count) %>%
+  mutate(p_lte125 = n_lte125/n_count) %>%
+  mutate(p_lte150 = n_lte150/n_count) %>%
+  mutate(p_lte175 = n_lte175/n_count) %>%
+  mutate(p_lte200 = n_lte200/n_count) %>%
+  mutate(p_lte225 = n_lte225/n_count) %>%
+  mutate(p_lte250 = n_lte250/n_count) %>%
+  mutate(p_lte175 = n_lte175/n_count) %>%
+  mutate(p_lte300 = n_lte300/n_count) 
+
+west_thresholds2
+```
+
+```{r}
+write.csv(west_thresholds2, '../outputs/west_thresholds2.csv',  row.names = FALSE)
+```
+
+# Plots East
+```{r}
+east_df
+```
+
+## East Density plot
+```{r}
+east_density = east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = nbr_postNbr_endYear, color = changeNote)) +
+  geom_density()  +
+  scale_color_manual(values = c('#d8b365','#5ab4ac')) +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_vline(xintercept = 250) +
+  xlab("Post disturbance NBR") +
+      ylab("Density") +
+  reg_theme
+
+east_density
+```
+
+```{r}
+east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = dnbr, color = changeNote)) +
+  geom_density()  +
+  scale_color_manual(values = c('#d8b365','#5ab4ac')) +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_vline(xintercept = 250) +
+  xlab("Post disturbance NBR") +
+      ylab("Density") +
+  reg_theme
+
+
+```
+
+```{r}
+east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = rdnbr, color = changeNote)) +
+  geom_density()  +
+  scale_color_manual(values = c('#d8b365','#5ab4ac')) +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_vline(xintercept = 250) +
+  xlab("Post disturbance NBR") +
+      ylab("Density") +
+  reg_theme
+
+
+```
+## East scatter plot
+
+```{r}
+east_plot = east_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = nbr_postNbr_endYear, y =rdnbr, color = changeNote)) +
+  geom_point(size=1.5, shape=1)  +
+  scale_color_manual(values = c('#d8b365','#5ab4ac')) +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_vline(xintercept = 300) +
+  geom_vline(xintercept = 250) +
+  geom_vline(xintercept = 200) +
+  xlab("Post disturbance NBR") +
+      ylab("RdNBR") +
+  reg_theme
+
+east_plot
+```
+```{r}
+west_df
+```
+
+## West Density
+```{r}
+west_density = west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = nbr_postNbr_endYear, color = changeNote)) +
+  geom_density()  +
+  scale_color_manual(values = c('#d8b365','#5ab4ac')) +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_vline(xintercept = 150) +
+  xlab("Post disturbance NBR") +
+      ylab("Density") +
+  reg_theme 
+
+west_density
+```
+
+```{r}
+west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = dnbr, color = changeNote)) +
+  geom_density()  +
+  scale_color_manual(values = c('#d8b365','#5ab4ac')) +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("dNBR") +
+      ylab("Density") +
+  reg_theme 
+
+
+```
+
+```{r}
+west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = rdnbr, color = changeNote)) +
+  geom_density()  +
+  scale_color_manual(values = c('#d8b365','#5ab4ac')) +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("RdNBR") +
+      ylab("Density") +
+  reg_theme 
+
+
+```
+## West Scatter
+```{r}
+west_plot = west_df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = nbr_postNbr_endYear, y =rdnbr, color = changeNote)) +
+  geom_point(size=1.5, shape=1)  +
+  scale_color_manual(values = c('#d8b365','#5ab4ac')) +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_vline(xintercept = 300) +
+  geom_vline(xintercept = 250) +
+  geom_vline(xintercept = 200) +
+  xlab("Post disturbance NBR") +
+      ylab("RdNBR") +
+  reg_theme 
+
+west_plot
+```
+
+# Combine East and West plots
+
+## Scatter
+```{r fig.height=5, fig.width=3}
+
+fig1 = cowplot::plot_grid(east_plot, west_plot, ncol=1)
+fig1
+```
+
+```{r fig.height=5, fig.width=3}
+
+fig2 = fig1 +
+  draw_label("(a)", x = 0.04, y = .99, fontfamily = "sans", fontface = "bold", color = "black", size = 10) +
+   draw_label("(b)", x = 0.04, y = .49, fontfamily = "sans", fontface = "bold", color = "black", size = 10) 
+  
+fig2
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/East-West-Thresholds.png", plot = fig2, width = 3, height = 5, units = c("in"), dpi = 600)
+```
+
+## Density
+
+
+```{r fig.height=5, fig.width=3}
+
+density_fig1 = cowplot::plot_grid(east_density, west_density, ncol=1)
+density_fig1
+```
+
+```{r fig.height=5, fig.width=3}
+
+density_fig2 = density_fig1 +
+  draw_label("(a)", x = 0.04, y = .99, fontfamily = "sans", fontface = "bold", color = "black", size = 10) +
+   draw_label("(b)", x = 0.04, y = .49, fontfamily = "sans", fontface = "bold", color = "black", size = 10) 
+  
+density_fig2
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/East-West-Density.png", plot = density_fig2, width = 3, height = 5, units = c("in"), dpi = 600)
+```
+
+# Plots
+
+```{r}
+p1 = df %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = nbrYr, y = nbr, color = startEnd)) +
+  geom_point() +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(~changeNote) 
+
+p1
+
+```
+
+
+```{r}
+ggsave("../figures/ClearCutThinStartEndNBR.png", plot=p1 ,  dpi = 600)
+```
+```{r}
+df4
+```
+
+```{r}
+df4 %>% 
+  filter(changeNote == "clearcut") 
+```
+
+```{r}
+df4 %>% 
+  filter(changeNote == "thinning") 
+```
+
+```{r}
+p2 = df4 %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = rdnbr, color=EPA_REGION)) +
+  geom_point() +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(~changeNote) 
+
+p2
+```
+
+
+
+```{r}
+p3 = df4 %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = rdnbr, color=as.factor(NA_L2CODE))) +
+  geom_point() +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(~changeNote) 
+
+p3
+```
+
+
+
+```{r}
+p4 = df4 %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = rdnbr, color=as.factor(NA_L1CODE))) +
+  geom_point() +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(~changeNote) 
+
+p4
+```
+
+```{r}
+p5 = df4 %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = rdnbr, color=changeNote)) +
+  geom_point() +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(~as.factor(NA_L1CODE)) 
+
+p5
+```
+```{r}
+ggsave("../figures/ClearCutThinEco1rdnbr.png", plot=p5 ,  dpi = 600)
+```
+
+```{r}
+p6 = df4 %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = dnbr, color=changeNote)) +
+  geom_point() +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(~as.factor(NA_L1CODE)) 
+
+p6
+```
+```{r}
+ggsave("../figures/ClearCutThinEco1dnbr.png", plot=p6 ,  dpi = 600)
+```
+
+```{r}
+df4
+```
+```{r}
+p7 = df4 %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(.,  aes(x = year_postNbr_endYear, y = nbr_postNbr_endYear, color=changeNote)) +
+  geom_point() +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(~as.factor(NA_L1CODE)) 
+
+p7
+```
+```{r}
+ggsave("../figures/ClearCutThinEco1Postnbr.png", plot=p7 ,  dpi = 600)
+```
+
+```{r}
+p8 = df4 %>% 
+  filter(changeNote %in% c("clearcut", "thinning")) %>%
+  ggplot(., aes(x = year_preNbr_startYear, y = nbr_preNbr_startYear, color=changeNote)) +
+  geom_point() +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  facet_wrap(~as.factor(NA_L1CODE)) 
+
+p8
+```
+
+
+# Plots with added LC1 end and LC2 end
+```{r}
+target_startLC1 = c("Trees")
+target_startLC2 = c("trees")
+target_endLC1 = c( "Grass/forb/herb", "Barren", "Shrubs")
+target_endLC2 = c( "grassForbHerb", "grassForbHerb|naturalBarren", "shrubs", "naturalBarren" )
+
+```
+
+
+```{r}
+p9 = df4 %>% 
+  filter(NA_L1CODE ==8) %>%
+  filter(startLC1 %in% target_startLC1)  %>%
+  filter(endLC1 %in% target_endLC1 | endLC2 %in% target_endLC2) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = rdnbr, color=changeNote)) +
+  geom_point() +
+   ggtitle("Ecoregion 8") +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+         plot.title = element_text(size=10))
+  
+p9
+``` 
+```{r}
+ggsave("../figures/EcoReg8EndLC12RdNBR.png", plot=p9 ,  dpi = 600)
+```
+
+```{r}
+p10 = df4 %>% 
+  filter(NA_L1CODE ==5) %>%
+  filter(endLC1 %in% target_endLC1 | endLC2 %in% target_endLC2) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = rdnbr, color=changeNote)) +
+  geom_point() +
+   ggtitle("Ecoregion 5") +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+         plot.title = element_text(size=10))
+  
+p10
+``` 
+
+```{r}
+ggsave("../figures/EcoReg5EndLC12RdNBR.png", plot=p10 ,  dpi = 600)
+```
+
+```{r}
+p11 = df4 %>% 
+  filter(NA_L1CODE ==6) %>%
+  filter(endLC1 %in% target_endLC1 | endLC2 %in% target_endLC2) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = rdnbr, color=changeNote)) +
+  geom_point() +
+   ggtitle("Ecoregion 6") +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+         plot.title = element_text(size=10))
+  
+p11
+``` 
+
+```{r}
+ggsave("../figures/EcoReg6EndLC12RdNBR.png", plot=p11 ,  dpi = 600)
+```
+
+```{r}
+p12 = df4 %>% 
+  filter(NA_L1CODE ==7) %>%
+  filter(endLC1 %in% target_endLC1 | endLC2 %in% target_endLC2) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = rdnbr, color=changeNote)) +
+  geom_point() +
+  ggtitle("Ecoregion 7") +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+         plot.title = element_text(size=10))
+  
+p12
+``` 
+
+```{r}
+ggsave("../figures/EcoReg7EndLC12RdNBR.png", plot=p12 ,  dpi = 600)
+```
+
+
+```{r}
+p13 = df4 %>% 
+  filter(NA_L1CODE ==8) %>%
+  filter(startLC1 %in% target_startLC1)  %>%
+  filter(endLC1 %in% target_endLC1 | endLC2 %in% target_endLC2) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = dnbr, color=changeNote)) +
+  geom_point() +
+   ggtitle("Ecoregion 8") +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+         plot.title = element_text(size=10))
+  
+p13
+``` 
+```{r}
+ggsave("../figures/EcoReg8EndLC12dNBR.png", plot=p13 ,  dpi = 600)
+```
+
+```{r}
+p14 = df4 %>% 
+  filter(NA_L1CODE ==5) %>%
+  filter(endLC1 %in% target_endLC1 | endLC2 %in% target_endLC2) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = dnbr, color=changeNote)) +
+  geom_point() +
+   ggtitle("Ecoregion 5") +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+         plot.title = element_text(size=10))
+  
+p14
+``` 
+
+```{r}
+ggsave("../figures/EcoReg5EndLC12dNBR.png", plot=p14 ,  dpi = 600)
+```
+
+```{r}
+p15 = df4 %>% 
+  filter(NA_L1CODE ==6) %>%
+  filter(endLC1 %in% target_endLC1 | endLC2 %in% target_endLC2) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = dnbr, color=changeNote)) +
+  geom_point() +
+   ggtitle("Ecoregion 6") +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+         plot.title = element_text(size=10))
+  
+p15
+``` 
+
+```{r}
+ggsave("../figures/EcoReg6EndLC12dNBR.png", plot=p15 ,  dpi = 600)
+```
+
+```{r}
+p16 = df4 %>% 
+  filter(NA_L1CODE ==7) %>%
+  filter(endLC1 %in% target_endLC1 | endLC2 %in% target_endLC2) %>%
+  ggplot(., aes(x = year_postNbr_endYear, y = dnbr, color=changeNote)) +
+  geom_point() +
+  ggtitle("Ecoregion 7") +
+  theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+         plot.title = element_text(size=10))
+  
+p16
+``` 
+
+```{r}
+ggsave("../figures/EcoReg7EndLC12dNBR.png", plot=p16 ,  dpi = 600)
+```
