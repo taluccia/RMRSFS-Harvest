@@ -9,11 +9,16 @@ output: html_document
 library(ggplot2)
 library(tidyverse)
 library(broom)
+library(sp) # spatial data
+library(rgdal) # geospatial data
+library(rgeos) # GIS Geometry
+library(sf)
 ```
 
 
 ```{r}
 df = read.csv('../data/csv/OR3000.csv')
+
 ```
 
 ```{r}
@@ -33,6 +38,38 @@ df1 = df %>% dplyr::select(year1:harvestYr) %>%
 
 df1
 ```
+
+```{r}
+df1
+```
+```{r}
+model = df1 %>%
+  dplyr::select(location:nbr) %>%
+  nest(data=-location) %>%                             
+  mutate(reg = purrr::map(data, ~lm(nbr~recoveryYr, .))) %>%   # do the regression
+  mutate(intercept=map_dbl(reg, ~coefficients(.)[1]),         # get values form regression
+         slope=map_dbl(reg, ~coefficients(.)[2]))
+
+model
+```
+
+```{r}
+model2 = model %>% mutate(intercept = round(intercept ,digit=2)) %>% mutate(slope = round(slope,digit=2)) %>% filter(slope <0)
+
+
+model2
+```
+
+```{r}
+
+model3 = merge(model2, df1, by="location") %>% filter(recoveryYr=="1") %>% dplyr::select(location, intercept:nbr)
+
+model3
+```
+
+
+# Other code
+
 
 ```{r}
 locations<-c("a","b","c")
@@ -73,24 +110,34 @@ df %>%
 
 ```
 
-```{r}
-df1
-```
-```{r}
-model = df1 %>%
-  dplyr::select(location:nbr) %>%
-  nest(data=-location) %>%                             
-  mutate(reg = map(data, ~lm(nbr~recoveryYr, .))) %>%   # do the regression
-  mutate(intercept=map_dbl(reg, ~coefficients(.)[1]),         # get values form regression
-         slope=map_dbl(reg, ~coefficients(.)[2]))
+`
 
-model
+# Projections
+USA Contiguous Albers Equal Area Conic, USGS (EPSG = 5070 or 102003)
+https://guides.library.duke.edu/r-geospatial/CRS
+
++proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
+```{r}
+us_proj = "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 ```
 
 ```{r}
-model %>% mutate(intercept = round(intercept ,digit=2)) %>% mutate(slope = round(slope,digit=2)) %>% filter(slope <0)
+wgs_proj = "+proj=longlat +datum=WGS84 +no_defs"
+```
+
+# Covert to points
+```{r}
+coords_df = cbind(model3$lng, model3$lat)
+model3_pt <- SpatialPointsDataFrame(coords_df, proj4string = CRS(wgs_proj), data = model3)
 ```
 
 
+# Transform from sp to sf
 
+```{r}
+model3_pt_sf = st_as_sf(model3_pt)
+```
 
+```{r eval=FALSE, include=FALSE}
+st_write(model3_pt_sf, "../outputs/point_data/ORSmallDataNegSlope.shp", driver="ESRI Shapefile")
+```

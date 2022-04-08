@@ -55,6 +55,11 @@ unique(df$startYear)
 ```{r}
 states= st_read("../data/states-shapefile/s_11au16.shp", "s_11au16")
 ```
+## EPA Ecoregions
+```{r}
+eco= st_read("../data/us_eco_l3_state_boundaries/us_eco_l3_state_boundaries.shp", "us_eco_l3_state_boundaries")
+```
+
 # Projections
 USA Contiguous Albers Equal Area Conic, USGS (EPSG = 5070 or 102003)
 https://guides.library.duke.edu/r-geospatial/CRS
@@ -81,8 +86,13 @@ lower48 = states %>%
 lower48
 ```
 
+# Reproject
 ```{r}
 lower48_proj <- st_transform(lower48, us_proj)
+```
+
+```{r}
+eco_proj <- st_transform(eco, us_proj)
 ```
 
 # Data frame to  points (spatial dataframe)
@@ -113,6 +123,7 @@ df_pt <- SpatialPointsDataFrame(coords_df, proj4string = CRS(us_proj), data = df
 df_pt_sf = st_as_sf(df_pt)
 ```
 
+# Join states to points
 ```{r}
 df_states = st_join(st_make_valid(df_pt_sf), lower48_proj, largest=TRUE) 
 ```
@@ -133,11 +144,37 @@ plot(lower48_proj)
 plot(df_states, add=TRUE)
 ```
 
-# Write to shapefile
+## Write to shapefile
 
 ```{r eval=FALSE, include=FALSE}
 st_write(df_states1, "../outputs/point_data/harvest_pt_states.shp", driver="ESRI Shapefile")
 ```
+
+# Join Ecoregion to points
+```{r}
+df_eco = st_join(st_make_valid(df_states1), eco_proj, largest=TRUE) 
+```
+
+```{r}
+df_eco 
+```
+
+## Remove geometry and write attributes to CSV
+```{r eval=FALSE, include=FALSE}
+df_eco %>% 
+  st_set_geometry(NULL) %>% 
+        write.csv(., '../outputs/csv/Points-EcoRegions.csv',  row.names = FALSE)
+  
+```
+
+## Write to shapefile
+
+```{r eval=FALSE, include=FALSE}
+st_write(df_eco, "../outputs/point_data/harvest_pt_states_ecoregions.shp", driver="ESRI Shapefile")
+```
+
+
+
 
 # Filter by State
 ```{r}
