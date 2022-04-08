@@ -5,7 +5,7 @@ output: html_document
 
 
 # Overview
-
+This script combines point data NBR values that were extracted from Google Earth Engine. The data is NBR values for individual point locations identified as harvest clear cut or harvest thinning in Landscape Change Monitoring System (LCMS). These NBR values were then used to develop thresholds. 
 
 # Packages
 

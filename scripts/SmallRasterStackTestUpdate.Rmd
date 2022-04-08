@@ -2,7 +2,10 @@
 title: "SmallRasterStackUpdate"
 output: html_document
 ---
+# Overview
+This script is using code from SmallRasterStackTest.Rmd and SmallDataOrganizeForLinear.Rmd on data from the small test region in the Oregon Coast range near Roseburg. The data set has been updated and now uses two thresholds, a post-disturbance NBR threshold and RdNBR threshold. It also uses a final land use confirmation of forests to remove any locations that experience land use conversion.
 
+The raster stacks are converted to data frames and combined into a single data frame for disturbance years 1986-1993. The data is subset to 3000 points and a linear regression is fit to each recovery location.
 
 
 # Packages

@@ -2,7 +2,11 @@
 title: "Samll Raster Stack"
 output: html_document
 ---
+# Overview
 
+This script was created to convert the image stack raster that was exported from Google Earth Engine for each recovery period (disturbance year plus six following years) into a data frame. The data frames for each recovery period were then  combined into a single data frame and export as a csv.
+
+This script is using data for a small test region in the Oregon coast range near Roseburg.
 
 # Packages
 ```{r message=FALSE, warning=FALSE}

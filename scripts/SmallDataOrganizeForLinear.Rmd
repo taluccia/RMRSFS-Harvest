@@ -2,6 +2,10 @@
 title: "Small Raster organize for lm"
 output: html_document
 ---
+# Overview
+This script takes the 3000 point subset that was shared with Tony Ives for an initial test in PARTs and applies a linear regression to each recovery trajectory. 
+
+The 3000 points are a subset from ~500,000 pixels for an initial test area in the Oregon Coast Range near Roseburg. This test set was created with an arbitrary post-disturbance NBR threshold.
 
 # Packages
 ```{r message=FALSE, warning=FALSE}

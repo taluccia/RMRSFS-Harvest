@@ -2,7 +2,8 @@
 title: "CSV to point"
 output: html_document
 ---
-
+# Overview
+This script takes the csv data from LCMS provided by Yang and converts it to a point shapefile to use in Google Earth Engine to extract NBR values to eventually evaluate thresholds to differentiate clear cuts from thinnings.
 
 # Clear workspace
 
@@ -10,9 +11,7 @@ output: html_document
 rm(list=ls()) 
 ```
 
-# Overview
 
-Create spatial points data  fram  for plots that burned from 2001 to present. Point data will be used  to extract  dnbr and RdNBR values from satellite imagery of of burn severity  calculations.
 
 # Pakcages
 ```{r}
