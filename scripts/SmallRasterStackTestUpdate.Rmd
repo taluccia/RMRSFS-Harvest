@@ -1,0 +1,181 @@
+---
+title: "SmallRasterStackUpdate"
+output: html_document
+---
+
+
+
+# Packages
+```{r message=FALSE, warning=FALSE}
+
+library(ggplot2)
+library(tidyverse)
+library(sf)
+library(ggmap) # devtools::install_github("dkahle/ggmap")
+library(ggrepel)
+library(RStoolbox)
+library(raster)
+library(rgdal)
+library(rasterVis)
+library(RColorBrewer)
+library(cowplot)
+library(ggspatial)
+library(maps)
+library(maptools)
+library(rgeos)
+library(sp)
+library(mapproj)
+```
+
+## Raster
+```{r}
+
+r86 <- stack("../data/GEE/OregonImageStackSmall1986.tif")
+r87 <- stack("../data/GEE/OregonImageStackSmall1987.tif")
+r88 <- stack("../data/GEE/OregonImageStackSmall1988.tif")
+r89 <- stack("../data/GEE/OregonImageStackSmall1989.tif")
+r90 <- stack("../data/GEE/OregonImageStackSmall1990.tif")
+r91 <- stack("../data/GEE/OregonImageStackSmall1991.tif")
+r92 <- stack("../data/GEE/OregonImageStackSmall1992.tif")
+r93 <- stack("../data/GEE/OregonImageStackSmall1993.tif")
+```
+
+```{r}
+r86
+```
+
+```{r}
+r93
+```
+
+```{r}
+plot(r86)
+```
+
+```{r}
+as.data.frame(r86)
+```
+
+
+
+```{r}
+df86 <- as.data.frame(r86) %>% drop_na() %>% mutate(harvestYr = 1986) %>% 
+  rename(year0=nbr, year1=nbr_1, year2=nbr_2, year3=nbr_3, year4=nbr_4, year5=nbr_5, year6=nbr_6)
+
+df87 <- as.data.frame(r87) %>% drop_na() %>% mutate(harvestYr = 1987) %>% 
+  rename(year0=nbr, year1=nbr_1, year2=nbr_2, year3=nbr_3, year4=nbr_4, year5=nbr_5, year6=nbr_6)
+
+df88 <- as.data.frame(r88) %>% drop_na() %>% mutate(harvestYr = 1988) %>% 
+  rename(year0=nbr, year1=nbr_1, year2=nbr_2, year3=nbr_3, year4=nbr_4, year5=nbr_5, year6=nbr_6)
+
+df89 <- as.data.frame(r89) %>% drop_na() %>% mutate(harvestYr = 1989) %>% 
+  rename(year0=nbr, year1=nbr_1, year2=nbr_2, year3=nbr_3, year4=nbr_4, year5=nbr_5, year6=nbr_6)
+
+df90 <- as.data.frame(r90) %>% drop_na() %>% mutate(harvestYr = 1990) %>% 
+  rename(year0=nbr, year1=nbr_1, year2=nbr_2, year3=nbr_3, year4=nbr_4, year5=nbr_5, year6=nbr_6)
+
+df91 <- as.data.frame(r91) %>% drop_na() %>% mutate(harvestYr = 1991) %>% 
+  rename(year0=nbr, year1=nbr_1, year2=nbr_2, year3=nbr_3, year4=nbr_4, year5=nbr_5, year6=nbr_6)
+
+df92 <- as.data.frame(r92) %>% drop_na() %>% mutate(harvestYr = 1992) %>% 
+  rename(year0=nbr, year1=nbr_1, year2=nbr_2, year3=nbr_3, year4=nbr_4, year5=nbr_5, year6=nbr_6)
+
+df93 <- as.data.frame(r93) %>% drop_na() %>% mutate(harvestYr = 1993) %>% 
+  rename(year0=nbr, year1=nbr_1, year2=nbr_2, year3=nbr_3, year4=nbr_4, year5=nbr_5, year6=nbr_6)
+```
+
+
+
+
+```{r}
+head(df86)
+head(df87)
+head(df88)
+head(df89)
+head(df90)
+head(df91)
+head(df92)
+head(df93)
+```
+
+```{r}
+allData = bind_rows(df86, df87, df88, df89, df90, df91, df92, df93)
+```
+
+```{r}
+summary(allData)
+```
+
+```{r}
+allData1 = allData %>% rename(lng = longitude, lat = latitude)
+
+allData1
+```
+
+```{r}
+write.csv(allData1, '../outputs/OregonSmallDataUpdate1986-1993.csv',  row.names = FALSE)
+```
+
+# Random Sample fo 3000
+
+```{r}
+set.seed(14)
+data3000 = allData1 %>% sample_n(size=3000) %>% dplyr::select(year1:harvestYr)
+
+data3000
+```
+
+```{r}
+
+summary(data3000)
+str(data3000)
+unique(data3000$harvestYr)
+```
+
+```{r}
+write.csv(data3000, '../outputs/OR3000Update.csv',  row.names = FALSE)
+```
+
+# Linear Models
+
+```{r}
+df1 = data3000 %>% dplyr::select(year1:harvestYr) %>%
+  rename("1"=year1, "2"=year2, "3"=year3, "4"=year4, "5"=year5, "6"=year6) %>%
+  mutate(location = row_number()) %>%
+  pivot_longer(
+    cols = 1:6,
+    names_to = "recoveryYr",
+    values_to = "nbr",
+    values_drop_na = TRUE
+  )
+
+df1
+```
+
+```{r}
+df1
+```
+```{r}
+model = df1 %>%
+  dplyr::select(location:nbr) %>%
+  nest(data=-location) %>%                             
+  mutate(reg = purrr::map(data, ~lm(nbr~recoveryYr, .))) %>%   # do the regression
+  mutate(intercept=map_dbl(reg, ~coefficients(.)[1]),         # get values form regression
+         slope=map_dbl(reg, ~coefficients(.)[2]))
+
+model
+```
+
+```{r}
+model2 = model %>% mutate(intercept = round(intercept ,digit=2)) %>% mutate(slope = round(slope,digit=2)) %>% filter(slope <0)
+
+
+model2
+```
+
+```{r}
+
+model3 = merge(model2, df1, by="location") %>% filter(recoveryYr=="1") %>% dplyr::select(location, intercept:nbr)
+
+model3
+```
